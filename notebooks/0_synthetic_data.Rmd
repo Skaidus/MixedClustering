@@ -1,0 +1,13 @@
+---
+title: "0_synthetic_data"
+output: html_document
+---
+
+```{r setup}
+source("./R/synthetic_data.R")
+```
+
+```{r}
+df <- get_static_points(500)
+plot(df$x, df$y, pch=16, col = df$label)
+```
