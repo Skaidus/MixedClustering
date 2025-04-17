@@ -21,9 +21,9 @@ plot(lag(non_stationary_data, 40), type = "l", main = "Non-Stationary Data with 
 ```{r}
 # set.seed(456)
 n <- 500
-ts <-prot1(n, 3, 60)
+ts <-prot1(n, 25, 60)
 noise <- rnorm(n, mean = 0, sd = .2)
-plot(ts$time, ts$values+noise, type='l')
+plot(1:n, ts+noise, type='l')
 ```
 # Prot 1
 ```{r}

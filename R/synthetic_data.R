@@ -1,6 +1,11 @@
-library(fourPNO)
-library(dplyr)
-
+if(!require('fourPNO')) {
+  install.packages('fourPNO')
+  library('fourPNO')
+}
+if(!require('dplyr')) {
+  install.packages('dplyr')
+  library('dplyr')
+}
 #' Gets synthetic data
 #'
 #' @param n the number of points per class
@@ -11,21 +16,41 @@ library(dplyr)
 #'
 #' @examples
 get_static_points <- function(n) {
-  df <- as.data.frame(rmvnorm(n, c(0,0), diag(2)))
-  names(df) <- c('x', 'y')
-  df['label'] <- 1
+  df <- as.data.frame(rmvnorm(n, c(-4,-4), diag(2)))
+  names(df) <- c('x1', 'x2')
   
-  dft <- as.data.frame(rmvnorm(n, c(-1,-1), diag(2)))
-  names(dft) <- c('x', 'y')
-  dft['label'] <- 2
+  dft <- as.data.frame(rmvnorm(n, c(-3,-3), diag(2)))
+  names(dft) <- c('x1', 'x2')
   df <- bind_rows(df, dft)
   
-  dft <- as.data.frame(rmvnorm(n, c(1,1), diag(2)))
-  names(dft) <- c('x', 'y')
-  dft['label'] <- 3
+  dft <- as.data.frame(rmvnorm(n, c(3,3), diag(2)))
+  names(dft) <- c('x1', 'x2')
+  df <- bind_rows(df, dft)
+
+  dft <- as.data.frame(rmvnorm(n, c(4,4), diag(2)))
+  names(dft) <- c('x1', 'x2')
   df <- bind_rows(df, dft)
   
-  return (df)
+  retu <- list(df[c('x1', 'x2')], rep(1:4, each=n))
+  names(retu) <- c('X', 'y')
+  return(retu)
+}
+
+get_dynamic_points <- function(n, t, shift_window, mean, sd) {
+  y <- rep(1:4, each=n)
+  ts <- list()
+  for(i in 1:n) {
+    ts[[length(ts)+1]] <- prot1(t, i %% shift_window, 60) + rnorm(n, mean = mean, sd = sd)
+  }
+  for(i in 1:(2*n)) {
+    ts[[length(ts)+1]] <- prot2(t, i %% shift_window, 60) + rnorm(n, mean = mean, sd = sd)
+  }
+  for(i in 1:n) {
+    ts[[length(ts)+1]] <- prot1(t, i %% shift_window, 60) + rnorm(n, mean = mean, sd = sd)
+  }
+  retu <- list(ts, y)
+  names(retu) <- c('X', 'y')
+  return(retu)
 }
 
 #' Title
@@ -49,36 +74,15 @@ prot1 <- function(n, shift, p){
       0
     }
   })
-  retu <- list(time, values)
-  names(retu) <- c('time', 'values')
-  return(retu)
+  return(values)
 }
 
 #'
 prot2 <- function(n, shift, p){
   time <- 1:n
   values <- cos(time/n*p)+.1*cos(time/n*p*10)+time**3/(n**3)
-  retu <- list(time,values)
-  names(retu) <- c('time', 'values')
-  return(retu)
+  # values <- time
+  return(values)
 }
 
 
-get_dynamic_points <- function(n, seed = 1) {
-  set.seed(seed)
-  df <- as.data.frame(rmvnorm(n, c(0,0), diag(2)))
-  names(df) <- c('x', 'y')
-  df['label'] <- 1
-  
-  dft <- as.data.frame(rmvnorm(n, c(-1,-1), diag(2)))
-  names(dft) <- c('x', 'y')
-  dft['label'] <- 2
-  df <- bind_rows(df, dft)
-  
-  dft <- as.data.frame(rmvnorm(n, c(1,1), diag(2)))
-  names(dft) <- c('x', 'y')
-  dft['label'] <- 3
-  df <- bind_rows(df, dft)
-  
-  return (df)
-}
