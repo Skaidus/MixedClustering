@@ -57,7 +57,7 @@ prot1 <- function(n, shift, p){
 #'
 prot2 <- function(n, shift, p){
   time <- 1:n
-  values <- cos(time/n*24)+.1*cos(time/n*240)+time**3/(n**3)
+  values <- cos(time/n*p)+.1*cos(time/n*p*10)+time**3/(n**3)
   retu <- list(time,values)
   names(retu) <- c('time', 'values')
   return(retu)

@@ -32,7 +32,8 @@ a <- prot1(100, 10, 20)
 ```
 ```{r}
 n <- 2000
-time <- 1:n
-plot(time, cos(time/n*24)+.1*cos(time/n*240)+time**3/(n**3), t='l')
+ts <- prot2(n, 0, 5)
+noise <- rnorm(n, mean = 0, sd = .2)
+plot(ts$time, ts$values+noise, type='l')
 
 ```
