@@ -11,6 +11,10 @@ get_cluster_labels <- function(n) {
   return(rep(1:4, each=n))
 }
 
+get_dynamic_cluster_labels <- function(n) {
+  return(append(append(rep(1, each=n), rep(2, each=2*n)),  rep(1, each=n)))
+}
+
 #' Gets synthetic data
 #'
 #' @param n the number of points per class
