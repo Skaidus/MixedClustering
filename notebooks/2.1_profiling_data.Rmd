@@ -1,0 +1,67 @@
+```{r src}
+source("./R/benchmarks.R")
+```
+
+```{r}
+stats <- data.frame(
+  method = character(),
+  k.dyn = integer(),
+  k.stat = integer(),
+  N = integer(),
+  T = integer(),
+  d = integer(),
+  seconds = double(),
+  memory = double()
+)
+
+k.dyn.L <- list(2,4,8,16, 32)
+k.stat.L <- list(2,4,8,16, 32)
+N.L <- list(10, 100, 500, 1000, 2000, 3000, 4000)
+T.L <- list(10, 100, 500, 1000, 2000, 3000, 4000)
+d.L <- list(2, 4, 8, 10, 15)
+
+n_iter <- length(k.dyn.L)+length(k.stat.L)+length(N.L)+length(T.L)+length(d.L)
+i = 1
+pb <- txtProgressBar(min = 0, max = n_iter, style=3, width=50, char="=")
+
+L.L <- list(k.dyn.L, k.stat.L, N.L, T.L, d.L)
+
+k.dyn.D <- 4
+k.stat.D <- 4
+N.D <- 500
+T.D <- 500
+d.D <- 8
+
+get_parameters <- function(value, position){
+  values <- list(k.dyn.D, k.stat.D, N.D, T.D, d.D)
+  values[position] <- value
+  names(values) <- c('k.dyn.i', 'k.stat.i', 'N.i', 'T.i', 'd.i')
+  return(values)
+}
+
+for(j in 1:length(L.L)){
+  list_i <- L.L[[j]]
+  for(v in list_i){
+    vv <- get_parameters(v, j)
+
+    X.stat <- get_static_data(vv$N.i, vv$d.i)
+    X.dyn <- get_dynamic_data(vv$N.i, vv$T.i)
+    res <- get_resources({static_clustering(X.stat, vv$k.stat.i)})
+    stats[nrow(stats) + 1,] = list("static", vv$k.dyn.i, vv$k.stat.i, vv$N.i, vv$T.i, vv$d.i, res[1], res[2])
+    res <- get_resources({dynamic_clustering(X.dyn, vv$k.dyn.i)})
+    stats[nrow(stats) + 1,] = list("dynamic", vv$k.dyn.i, vv$k.stat.i, vv$N.i, vv$T.i, vv$d.i, res[1], res[2])
+    res <- get_resources({mixed_clustering(X.stat, X.dyn, vv$k.stat.i, vv$k.dyn.i)})
+    stats[nrow(stats) + 1,] = list("mixed", vv$k.dyn.i, vv$k.stat.i, vv$N.i, vv$T.i, vv$d.i, res[1], res[2])
+    setTxtProgressBar(pb, i)
+    i <- i + 1
+  }
+}
+
+write.csv(stats, paste0("./output/benchmark_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".csv"), row.names=FALSE)
+
+close(pb)
+```
+
+```{r src}
+write.csv(stats, paste0("./output/benchmark_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".csv"), row.names=FALSE)
+```

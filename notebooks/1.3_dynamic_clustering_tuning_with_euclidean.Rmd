@@ -1,0 +1,64 @@
+```{r src}
+source("./R/synthetic_data.R")
+```
+```{r seed}
+set.seed(776)
+n <- 500
+t <- 500
+
+y <- get_cluster_labels(n)
+X.dyn <- get_dynamic_points(n, t, 15, 0, .3)
+```
+
+```{r compare clustering setup}
+
+internal_evaluators <- cvi_evaluators("internal")
+score_internal <- internal_evaluators$score
+pick_majority <- internal_evaluators$pick
+
+```
+
+```{r compare clustering setup}
+# Do with parallel processing
+
+
+cfgs <- compare_clusterings_configs(
+    types = c("h"), # hierarchical
+    k = seq(from = 2L, to = 8L, by = 2L), 
+    controls = list(
+        hierarchical = hierarchical_control(
+            method = c('ward.D2')
+        )
+    ),
+    
+    preprocs = pdc_configs(
+        type = "preproc",
+        zscore = list(center = c(TRUE)) # preprocessing
+    ),
+    distances = pdc_configs(
+      type="distance",
+      dtw_basic = list(
+        window.size = 20L, 
+        norm = c("L1") # manhattan or euclidean
+      ),
+      L2 = list()
+    ),
+    centroids = pdc_configs(
+        type="centroid",
+        hierarchical = list(
+          shape_extraction = list()
+        )
+
+    )
+)
+```
+```{r run comparison}
+cmp <- compare_clusterings(X.dyn, types = c("h"), configs = cfgs,
+                                        seed = 2973L, trace = TRUE,
+                                        score.clus = score_internal, pick.clus = pick_majority,return.objects = FALSE)
+
+```
+```{r get cluster}
+X.dyn.clust.euclid <- repeat_clustering(X.dyn, cmp, cmp$pick$config_id)
+# get the list with X.dyn.clust@cluster
+```

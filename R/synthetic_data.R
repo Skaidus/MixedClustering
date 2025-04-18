@@ -6,6 +6,11 @@ if(!require('dplyr')) {
   install.packages('dplyr')
   library('dplyr')
 }
+
+get_cluster_labels <- function(n) {
+  return(rep(1:4, each=n))
+}
+
 #' Gets synthetic data
 #'
 #' @param n the number of points per class
@@ -16,28 +21,25 @@ if(!require('dplyr')) {
 #'
 #' @examples
 get_static_points <- function(n) {
-  df <- as.data.frame(rmvnorm(n, c(-4,-4), diag(2)))
-  names(df) <- c('x1', 'x2')
+  X <- as.data.frame(rmvnorm(n, c(-4,-4), diag(2)))
+  names(X) <- c('x1', 'x2')
   
-  dft <- as.data.frame(rmvnorm(n, c(-3,-3), diag(2)))
-  names(dft) <- c('x1', 'x2')
-  df <- bind_rows(df, dft)
+  Xt <- as.data.frame(rmvnorm(n, c(-3,-3), diag(2)))
+  names(Xt) <- c('x1', 'x2')
+  X <- bind_rows(X, Xt)
   
-  dft <- as.data.frame(rmvnorm(n, c(3,3), diag(2)))
-  names(dft) <- c('x1', 'x2')
-  df <- bind_rows(df, dft)
+  Xt <- as.data.frame(rmvnorm(n, c(3,3), diag(2)))
+  names(Xt) <- c('x1', 'x2')
+  X <- bind_rows(X, Xt)
 
-  dft <- as.data.frame(rmvnorm(n, c(4,4), diag(2)))
-  names(dft) <- c('x1', 'x2')
-  df <- bind_rows(df, dft)
+  Xt <- as.data.frame(rmvnorm(n, c(4,4), diag(2)))
+  names(Xt) <- c('x1', 'x2')
+  X <- bind_rows(X, Xt)
   
-  retu <- list(df[c('x1', 'x2')], rep(1:4, each=n))
-  names(retu) <- c('X', 'y')
-  return(retu)
+  return(X)
 }
 
 get_dynamic_points <- function(n, t, shift_window, mean, sd) {
-  y <- rep(1:4, each=n)
   ts <- list()
   for(i in 1:n) {
     ts[[length(ts)+1]] <- prot1(t, i %% shift_window, 60) + rnorm(n, mean = mean, sd = sd)
@@ -48,9 +50,7 @@ get_dynamic_points <- function(n, t, shift_window, mean, sd) {
   for(i in 1:n) {
     ts[[length(ts)+1]] <- prot1(t, i %% shift_window, 60) + rnorm(n, mean = mean, sd = sd)
   }
-  retu <- list(ts, y)
-  names(retu) <- c('X', 'y')
-  return(retu)
+  return(ts)
 }
 
 #' Title

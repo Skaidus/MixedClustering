@@ -1,0 +1,52 @@
+```{r src}
+source("./R/synthetic_data.R")
+```
+```{r seed}
+set.seed(776)
+n <- 500
+
+y <- get_cluster_labels(n)
+X <- as.data.frame(scale(get_static_points(n)))
+```
+
+```{r CVI}
+
+df.static.cvis <- list("silhouette", "dunn", "db", "ch")
+df.static.ks <- list(2,3,5,7,9)
+
+
+dt <- data.frame(matrix(ncol = 6, nrow = 0))
+colnames(dt) <- c('K', 'Distance', 
+                  'Silhouette', 'Dunn', 'DB', 'CH') # SAME ORDER!!!
+for(d_c in list("euclidean", 
+                "manhattan")){
+  for(k_c in df.static.ks){
+  row <- c(k_c, d_c)
+  for(cvi_c in df.static.cvis) {
+  t <- NbClust(X, distance = d_c, min.nc=k_c, max.nc=k_c, method = "ward.D2", index = cvi_c)
+  row <- append(row, t$All.index)
+  }
+  dt[nrow(dt) + 1,] = row
+  }
+  
+}
+s <- xtable(dt, helvetica=FALSE)
+align(s) <- "r||rr|rrrr||"
+print(s, include.rownames = FALSE)
+rm(s, t, dt)
+```
+## Clustering parameter tuning
+```{r choose k}
+
+fviz_nbclust(X, hcut, method = "wss", k.max=10,
+               hc_func = "hclust",
+  hc_method = "ward.D2",
+  hc_metric = "euclidean") +
+  labs(subtitle = "Elbow method")
+
+fviz_nbclust(X, hcut, method = "silhouette", k.max=10,
+               hc_func = "hclust",
+  hc_method = "ward.D2",
+  hc_metric = "euclidean")+
+  labs(subtitle = "Silhouette method")
+```
