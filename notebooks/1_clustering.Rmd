@@ -34,10 +34,11 @@ if(!require('plot3D')) {
 ```
 ```{r src}
 source("./R/synthetic_data.R")
+source("./R/benchmarks.R")
 ```
 # Static
 ## Get data
-```{r seed}
+```{r get data}
 n <- 500
 y <- get_cluster_labels(n)
 
@@ -46,261 +47,32 @@ X.stat <- get_static_points(n)
 ```
 ## Get clusters
 ```{r get clusters}
-k = 2
-X.static.clust <- hcut(X.stat, k = k, stand = TRUE, hc_func = "hclust",
-  hc_method = "ward.D2",
-  hc_metric = "euclidean")
+X.static.clust <- static_clustering(X.stat, 2)
 fviz_silhouette(X.static.clust)
 fviz_cluster(X.static.clust, geom="point")
 ```
 
 # Dynamic
-```{r src}
-source("./R/synthetic_data.R")
-```
-```{r create prototypes}
+```{r get data}
 t <- 500
 X.dyn <- get_dynamic_points(n, t, 15, 0, .3)
 ```
-```{r plot some}
-plot(1:t, X.dyn[[1500]], type='l')
+```{r get clusters}
+X.dyn.clust <- dynamic_clustering(X.dyn, 2)
 
-```
-## Choose clusters
-```{r compare clustering setup}
-
-internal_evaluators <- cvi_evaluators("internal")
-score_internal <- internal_evaluators$score
-pick_majority <- internal_evaluators$pick
-
-```
-```{r compare clustering setup}
-# Do with parallel processing
-
-
-
-cfgs <- compare_clusterings_configs(
-    types = c("h"), # hierarchical
-    k = seq(from = 2L, to = 2L, by = 1L), 
-    controls = list(
-        hierarchical = hierarchical_control(
-            method = c('ward.D2')
-        )
-    ),
-    
-    preprocs = pdc_configs(
-        type = "preproc",
-        zscore = list(center = c(TRUE)) # preprocessing
-    ),
-    distances = pdc_configs(
-      type="distance",
-      dtw_basic = list(
-        window.size = seq(from=10L,to=15L,by=5L), 
-        norm = c("L1") # manhattan or euclidean
-      )
-    ),
-    centroids = pdc_configs(
-        type="centroid",
-        hierarchical = list(
-          shape_extraction = list()
-        )
-
-    )
-)
-```
-```{r direct clustering}
-
-if(!require('parallel')) {
-  install.packages('parallel')
-  library('parallel')
-}
-
-if(!require('doParallel')) {
-  install.packages('doParallel')
-}
-# create multi-process workers
-workers <- makeCluster(detectCores())
-# load dtwclust in each one, and make them use 1 thread per worker
-invisible(clusterEvalQ(workers, {
-    library(dtwclust)
-    RcppParallel::setThreadOptions(1L)
-}))
-# register your workers, e.g. with doParallel
-require(doParallel)
-registerDoParallel(workers)
-
-
-X.dyn.clust.alg <- tsclust(X.dyn,
-  k = 2L,
-  type = "hierarchical",
-  preproc=zscore,
-  distance = "dtw_basic",
-  seed = 2973L,
-  centroid=shape_extraction,
-  trace = TRUE,
-  control = hierarchical_control(method = 'ward.D2'),
-  args = tsclust_args(preproc = list(center = FALSE),
-    dist = list(window.size = 20L, norm="L1"),
-    cent = list(window.size = 20L,norm = "L1")
-    )
-)
-
-
-registerDoSEQ()
-
-```
-```{r direct clustering}
-
-X.dyn.clust.alg <- tsclust(X.dyn,
-  k = 2L,
-  type = "hierarchical",
-  preproc=zscore,
-  distance = "dtw_basic",
-  seed = 2973L,
-  trace = TRUE,
-  # centroid =  "default",
-  # control = hierarchical_control(method = 'ward.D2'),
-  args = tsclust_args(preproc = list(center = FALSE),
-    dist = list(window.size = 20L, norm="L1")
-    # ,
-    # cent = list(window.size = 20L,norm = "L1")
-    )
-)
-
-```
-
-```{r run comparison}
-
-# # create multi-process workers
-# workers <- makeCluster(detectCores())
-# # load dtwclust in each one, and make them use 1 thread per worker
-# invisible(clusterEvalQ(workers, {
-#     library(dtwclust)
-#     RcppParallel::setThreadOptions(1L)
-# }))
-# # register your workers, e.g. with doParallel
-# require(doParallel)
-# registerDoParallel(workers)
-
-
-cmp <- compare_clusterings(X.dyn, types = c("h"), configs = cfgs,
-                                        seed = 2973L, trace = TRUE,
-                                        score.clus = score_internal, pick.clus = pick_majority,return.objects = FALSE)
-
-# registerDoSEQ()
-```
-
-```{r get cluster}
-X.dyn.clust <- repeat_clustering(X.dyn, cmp, cmp$pick$config_id)
-# get the list with X.dyn.clust@cluster
-```
-
-# Drawings
-```{r get cluster}
-dend <- X.dyn.clust
-dend$labels <- character(1940)
-plot(X.dyn.clust, type='centroids')
-```
-```{r get cluster}
-dend <- X.dyn.clust
-dend$labels <- character(1940)
-plot(X.dyn.clust, type='sc')
-```
-## Metrics
-```{r get cluster}
-if(!require('xtable')) {
-  install.packages('xtable')
-  library('xtable')
-}
-t <- cmp[["results"]][["hierarchical"]][c("k", "norm_distance", "norm_centroid",
-                                          "window.size_distance", "window.size_centroid",
-                                          "Sil","D", "COP", "DB", "DBstar", "CH")]
-
-t <- t %>%
- filter(norm_distance == norm_centroid) %>%
-  filter(window.size_distance == window.size_centroid) %>%
-select(-c(norm_centroid, window.size_centroid)) %>%
-  rename(norm=norm_distance, window = window.size_distance)
-s <- xtable(t, helvetica=FALSE)
-align(s) <- "||rrlr|rrrrrr||"
-print(s, include.rownames = FALSE)
-rm(s, t)
 ```
 # Mixed
 ## Get data
 ```{r seed}
-library("plot3D")
 set.seed(776)
 ```
 
 
-```{r create prototypes}
-df <- get_static_points(500)
-X <- df$X
-y <- df$y
-X$x3 <- (X.dyn.clust@cluster - 1)
-
-```
-
-```{r create prototypes}
-scatter3D(X$x1, X$x2, X$x3, colvar=y)
-```
-## Preprocessing
-```{r normalize}
-X <- as.data.frame(scale(X))
-scatter3D(X$x1, X$x2, X$x3, colvar=y)
-```
-```{r CVI}
-
-df.static.cvis <- list("silhouette", "dunn", "db", "ch")
-df.static.ks <- list(2,3,4,5,6,7,9)
-
-
-dt <- data.frame(matrix(ncol = 6, nrow = 0))
-colnames(dt) <- c('K', 'Distance', 
-                  'Silhouette', 'Dunn', 'DB', 'CH') # SAME ORDER!!!
-for(d_c in list("euclidean", 
-                "manhattan")){
-  for(k_c in df.static.ks){
-  row <- c(k_c, d_c)
-  for(cvi_c in df.static.cvis) {
-  t <- NbClust(X, distance = d_c, min.nc=k_c, max.nc=k_c, method = "ward.D2", index = cvi_c)
-  row <- append(row, t$All.index)
-  }
-  dt[nrow(dt) + 1,] = row
-  }
-  
-}
-s <- xtable(dt, helvetica=FALSE)
-align(s) <- "r||rr|rrrr||"
-print(s, include.rownames = FALSE)
-rm(s, t, dt)
-```
-## Clustering parameter tuning
-```{r choose k}
-
-fviz_nbclust(X, hcut, method = "wss", k.max=10,
-               hc_func = "hclust",
-  hc_method = "ward.D2",
-  hc_metric = "euclidean") +
-  labs(subtitle = "Elbow method")
-
-fviz_nbclust(X, hcut, method = "silhouette", k.max=10,
-               hc_func = "hclust",
-  hc_method = "ward.D2",
-  hc_metric = "euclidean")+
-  labs(subtitle = "Silhouette method")
-```
-# Get clusters
 ```{r get clusters}
-k = 4
-X.static.clust <- hcut(X, k = k, stand = FALSE, hc_func = "hclust",
-  hc_method = "ward.D2",
-  hc_metric = "euclidean")
-fviz_silhouette(X.static.clust)
-fviz_cluster(X.static.clust, geom="point")
+X.mix.clust <- mixed_clustering(X.stat, X.dyn, 2, 2)
+
 ```
 
-```{r get clusters}
-scatter3D(X$x1, X$x2, X$x3, colvar=X.static.clust$cluster)
+```{r graph clusters}
+scatter3D(X.stat$x1, X.stat$x2, X.stat$dyn.clust, colvar=X.mix.clust$cluster)
 ```

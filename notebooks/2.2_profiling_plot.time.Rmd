@@ -13,8 +13,14 @@ if(!require('ggplot2')) {
   install.packages('ggplot2')
   library('ggplot2')
 }
+
+if(!require('viridis')){
+    install.packages("viridis")
+    library(viridis)
+}
+options(ggplot2.discrete.colour= c("blue", "#3be63b", "red"))
 ```
-```{r src}
+```{r define default values}
 k.dyn.D <- 4
 k.stat.D <- 4
 N.D <- 500
@@ -22,66 +28,62 @@ T.D <- 500
 d.D <- 8
 ```
 
-# Template
-No difference between the two
-```{r src}
-ggplot(read.csv("./output/benchmark_20250418_155854.csv") %>%
-distinct(method, k.dyn, k.stat, N, T, d, .keep_all = TRUE) %>%
-filter(k.dyn==k.dyn.D & k.stat==k.stat.D & N == N.D & T == T.D & d == d.D) %>% 
-as.data.frame(), 
-    aes(x=k.dyn, y=seconds, group=method, color=method)) + 
-    geom_line(size=2)
-```
 
 # Number of dynamic clusters 
-No difference between the two
-```{r src}
-ggplot(read.csv("./output/benchmark_20250418_155854.csv") %>%
+```{r}
+png(filename="./output/plots/3_k.dyn.png")
+ggplot(read.csv("./data/benchmark_example.csv") %>%
 distinct(method, k.dyn, k.stat, N, T, d, .keep_all = TRUE) %>%
 filter(k.stat==k.stat.D & N == N.D & T == T.D & d == d.D) %>% 
 as.data.frame(), 
     aes(x=k.dyn, y=seconds, group=method, color=method)) + 
     geom_line(size=2)
+dev.off()
 ```
 
 
 # Number of static clusters
-No difference between the two
-```{r src}
-ggplot(read.csv("./output/benchmark_20250418_155854.csv") %>%
+```{r}
+png(filename="./output/plots/3_k.stat.png")
+ggplot(read.csv("./data/benchmark_example.csv") %>%
 distinct(method, k.dyn, k.stat, N, T, d, .keep_all = TRUE) %>%
 filter(k.dyn==k.dyn.D & N == N.D & T == T.D & d == d.D) %>% 
 as.data.frame(), 
     aes(x=k.stat, y=seconds, group=method, color=method)) + 
     geom_line(size=2)
-```
-# Number of points
-No difference between the two
-```{r src}
-ggplot(read.csv("./output/benchmark_20250418_155854.csv") %>%
-distinct(method, k.dyn, k.stat, N, T, d, .keep_all = TRUE) %>%
-filter(k.dyn==k.dyn.D & k.stat==k.stat.D & T == T.D & d == d.D) %>% 
-as.data.frame(), 
-    aes(x=N, y=seconds, group=method, color=method)) + 
-    geom_line(size=2)
-```
-# Number of time series points
-No difference between the two
-```{r src}
-ggplot(read.csv("./output/benchmark_20250418_155854.csv") %>%
-distinct(method, k.dyn, k.stat, N, T, d, .keep_all = TRUE) %>%
-filter(k.dyn==k.dyn.D & k.stat==k.stat.D & N == N.D & d == d.D) %>% 
-as.data.frame(), 
-    aes(x=T, y=seconds, group=method, color=method)) + 
-    geom_line(size=2)
+dev.off()
 ```
 # Number of static variables
-No difference between the two
-```{r src}
-ggplot(read.csv("./output/benchmark_20250418_155854.csv") %>%
+```{r}
+png(filename="./output/plots/3_dimensions.png")
+ggplot(read.csv("./data/benchmark_example.csv") %>%
 distinct(method, k.dyn, k.stat, N, T, d, .keep_all = TRUE) %>%
 filter(k.dyn==k.dyn.D & k.stat==k.stat.D & N == N.D & T == T.D) %>% 
 as.data.frame(), 
     aes(x=d, y=seconds, group=method, color=method)) + 
-    geom_line(size=2)
+    geom_line(size=2)  
+dev.off()
+```
+
+# Number of points
+```{r}
+png(filename="./output/plots/3_points.png")
+ggplot(read.csv("./data/benchmark_example.csv") %>%
+distinct(method, k.dyn, k.stat, N, T, d, .keep_all = TRUE) %>%
+filter(k.dyn==k.dyn.D & k.stat==k.stat.D & T == T.D & d == d.D) %>% 
+as.data.frame(), 
+    aes(x=N, y=seconds, group=method, color=method)) +
+    geom_line(size=2) + labs(x = "Amount of instances", y= "Time (seconds)") 
+dev.off()
+```
+# Number of time series points
+```{r}
+png(filename="./output/plots/3_timestamps.png")
+ggplot(read.csv("./data/benchmark_example.csv") %>%
+distinct(method, k.dyn, k.stat, N, T, d, .keep_all = TRUE) %>%
+filter(k.dyn==k.dyn.D & k.stat==k.stat.D & N == N.D & d == d.D) %>% 
+as.data.frame(), 
+    aes(x=T, y=seconds, group=method, color=method)) + 
+    geom_line(size=2) + labs(x = "Amount of timestamps", y= "Time (seconds)") 
+dev.off()
 ```

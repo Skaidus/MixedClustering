@@ -1,12 +1,11 @@
-```{r src}
+```{r import libraries}
 source("./R/synthetic_data.R")
 ```
-```{r seed}
+```{r get data set}
 set.seed(776)
 n <- 500
 t <- 500
 
-y <- get_cluster_labels(n)
 X.dyn <- get_dynamic_points(n, t, 15, 0, .3)
 ```
 
@@ -17,10 +16,7 @@ score_internal <- internal_evaluators$score
 pick_majority <- internal_evaluators$pick
 
 ```
-```{r compare clustering setup}
-# Do with parallel processing
-
-
+```{r configurations to explore}
 
 cfgs <- compare_clusterings_configs(
     types = c("h"), # hierarchical
@@ -59,7 +55,6 @@ cmp <- compare_clusterings(X.dyn, types = c("h"), configs = cfgs,
                                         score.clus = score_internal, pick.clus = pick_majority,return.objects = FALSE)
 
 ```
-```{r get cluster}
+```{r get best clustering}
 X.dyn.clust <- repeat_clustering(X.dyn, cmp, cmp$pick$config_id)
-# get the list with X.dyn.clust@cluster
 ```

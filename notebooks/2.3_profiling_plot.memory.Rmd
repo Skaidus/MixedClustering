@@ -1,0 +1,91 @@
+```{r}
+# Parse char -> date
+if(!require('dplyr')) {
+  install.packages('dplyr')
+  library('dplyr')
+}
+if(!require('lubridate')) {
+  install.packages('lubridate')
+  library('lubridate')
+}
+
+if(!require('ggplot2')) {
+  install.packages('ggplot2')
+  library('ggplot2')
+}
+
+if(!require('viridis')){
+    install.packages("viridis")
+    library(viridis)
+}
+options(ggplot2.discrete.colour= c("blue", "#3be63b", "red"))
+```
+```{r default values}
+k.dyn.D <- 4
+k.stat.D <- 4
+N.D <- 500
+T.D <- 500
+d.D <- 8
+```
+
+
+# Number of dynamic clusters 
+```{r}
+png(filename="./output/plots/4_k.dyn.png")
+ggplot(read.csv("./data/benchmark_example.csv") %>%
+distinct(method, k.dyn, k.stat, N, T, d, .keep_all = TRUE) %>%
+filter(k.stat==k.stat.D & N == N.D & T == T.D & d == d.D) %>% 
+as.data.frame(), 
+    aes(x=k.dyn, y=memory, group=method, color=method)) + 
+    geom_line(size=2)
+dev.off()
+```
+
+
+# Number of static clusters
+```{r}
+png(filename="./output/plots/4_k.stat.png")
+ggplot(read.csv("./data/benchmark_example.csv") %>%
+distinct(method, k.dyn, k.stat, N, T, d, .keep_all = TRUE) %>%
+filter(k.dyn==k.dyn.D & N == N.D & T == T.D & d == d.D) %>% 
+as.data.frame(), 
+    aes(x=k.stat, y=memory, group=method, color=method)) + 
+    geom_line(size=2)
+dev.off()
+```
+# Number of static variables
+```{r}
+png(filename="./output/plots/4_dimensions.png")
+ggplot(read.csv("./data/benchmark_example.csv") %>%
+distinct(method, k.dyn, k.stat, N, T, d, .keep_all = TRUE) %>%
+filter(k.dyn==k.dyn.D & k.stat==k.stat.D & N == N.D & T == T.D) %>% 
+as.data.frame(), 
+    aes(x=d, y=memory, group=method, color=method)) + 
+    geom_line(size=2)
+dev.off()
+```
+
+# Number of points
+```{r src}
+png(filename="./output/plots/4_points.png")
+ggplot(read.csv("./data/benchmark_example.csv") %>%
+distinct(method, k.dyn, k.stat, N, T, d, .keep_all = TRUE) %>%
+filter(k.dyn==k.dyn.D & k.stat==k.stat.D & T == T.D & d == d.D) %>% 
+mutate(memory = memory / 1000) %>%
+as.data.frame(), 
+    aes(x=N, y=memory, group=method, color=method)) + 
+    geom_line(size=2)  + labs(x = "Amount of instances", y= "Memory (Gb)") 
+dev.off()
+```
+# Number of time series points
+```{r src}
+png(filename="./output/plots/4_timestamps.png")
+ggplot(read.csv("./data/benchmark_example.csv") %>%
+distinct(method, k.dyn, k.stat, N, T, d, .keep_all = TRUE) %>%
+filter(k.dyn==k.dyn.D & k.stat==k.stat.D & N == N.D & d == d.D) %>% 
+mutate(memory = memory / 1000) %>%
+as.data.frame(), 
+    aes(x=T, y=memory, group=method, color=method)) + 
+    geom_line(size=2) + labs(x = "Amount of instances", y= "Memory (Gb)") 
+dev.off()
+```

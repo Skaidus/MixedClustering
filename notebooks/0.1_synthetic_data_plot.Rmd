@@ -1,4 +1,4 @@
-```{r src}
+```{r import libraries}
 source("./R/synthetic_data.R")
 if(!require('viridis')){
     install.packages("viridis")
@@ -7,7 +7,7 @@ if(!require('viridis')){
 
 ```
 # Static
-```{r seed}
+```{r generate data set and labels}
 n <- 500
 y <- get_cluster_labels(n)
 
@@ -23,7 +23,7 @@ legend(x="topright", legend=c('A', 'B', 'C', 'D'), fill=1:4)
 dev.off()
 ```
 # Dynamic
-```{r create prototypes}
+```{r get dynamic prototypes}
 t <- 500
 
 ts <- prot1(t, 0, 60)

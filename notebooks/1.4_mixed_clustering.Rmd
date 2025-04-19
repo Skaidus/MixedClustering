@@ -45,7 +45,7 @@ source("./R/synthetic_data.R")
 ## Get data
 
 
-```{r create prototypes}
+```{r get data}
 n <- 500
 y <- get_cluster_labels(n)
 y.dyn <- get_dynamic_cluster_labels(n)
@@ -56,17 +56,14 @@ X$x3 <- y.dyn
 
 ```
 
-```{r create prototypes}
-scatter3D(X$x1, X$x2, X$x3, colvar=y, col=viridis(4), legend.plot = FALSE)
-```
 ## Preprocessing
-```{r normalize}
+```{r normalize and plot}
 png(filename="./output/plots/2_mixed_static_data.png")
 scatter3D(X$x1, X$x2, X$x3, colvar=y, col=viridis(4), colkey=FALSE)
 dev.off()
 ```
 ## Clustering parameter tuning
-```{r choose k}
+```{r check Silhouette and Elbow method}
 png(filename="./output/plots/2_mixed_static_data.elbow1.png")
 fviz_nbclust(X, hcut, method = "wss", k.max=10,
                hc_func = "hclust",
@@ -93,6 +90,6 @@ fviz_silhouette(X.static.clust)
 fviz_cluster(X.static.clust, geom="point")
 ```
 
-```{r get clusters}
+```{r get clusters and plot}
 scatter3D(X$x1, X$x2, X$x3, colvar=X.static.clust$cluster)
 ```
