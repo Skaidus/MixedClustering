@@ -1,8 +1,8 @@
 # Integrating Static and Dynamic Hierarchical Clustering
 
 <p float="left">
-  <img src="./assets/mixed_static_data.png" width="30%" />
-  <img src="./assets/dynamic_data.proto2.png" width="30%" /> 
+  <img src="./assets/mixed_static_data.png" width="48%" />
+  <img src="./assets/dynamic_data.proto2.png" width="48%" /> 
 </p>
 R code for mixed clustering synthetic data and benchmarking simulation.
 
