@@ -37,7 +37,8 @@ distinct(method, k.dyn, k.stat, N, T, d, .keep_all = TRUE) %>%
 filter(k.stat==k.stat.D & N == N.D & T == T.D & d == d.D) %>% 
 as.data.frame(), 
     aes(x=k.dyn, y=seconds, group=method, color=method)) + 
-    geom_line(size=2)
+    geom_line(size=2) + labs(x = "Amount of dynamic clusters", y= "Time (seconds)") +
+    theme_bw()
 dev.off()
 ```
 
@@ -50,7 +51,8 @@ distinct(method, k.dyn, k.stat, N, T, d, .keep_all = TRUE) %>%
 filter(k.dyn==k.dyn.D & N == N.D & T == T.D & d == d.D) %>% 
 as.data.frame(), 
     aes(x=k.stat, y=seconds, group=method, color=method)) + 
-    geom_line(size=2)
+    geom_line(size=2)+ labs(x = "Amount of static clusters", y= "Time (seconds)") +
+    theme_bw()
 dev.off()
 ```
 # Number of static variables
@@ -61,7 +63,8 @@ distinct(method, k.dyn, k.stat, N, T, d, .keep_all = TRUE) %>%
 filter(k.dyn==k.dyn.D & k.stat==k.stat.D & N == N.D & T == T.D) %>% 
 as.data.frame(), 
     aes(x=d, y=seconds, group=method, color=method)) + 
-    geom_line(size=2)  
+    geom_line(size=2)  + labs(x = "Amount of static variables", y= "Time (seconds)") +
+    theme_bw()
 dev.off()
 ```
 
@@ -73,7 +76,8 @@ distinct(method, k.dyn, k.stat, N, T, d, .keep_all = TRUE) %>%
 filter(k.dyn==k.dyn.D & k.stat==k.stat.D & T == T.D & d == d.D) %>% 
 as.data.frame(), 
     aes(x=N, y=seconds, group=method, color=method)) +
-    geom_line(size=2) + labs(x = "Amount of instances", y= "Time (seconds)") 
+    geom_line(size=2) + labs(x = "Amount of instances", y= "Time (seconds)") +
+    theme_bw()
 dev.off()
 ```
 # Number of time series points
@@ -84,6 +88,7 @@ distinct(method, k.dyn, k.stat, N, T, d, .keep_all = TRUE) %>%
 filter(k.dyn==k.dyn.D & k.stat==k.stat.D & N == N.D & d == d.D) %>% 
 as.data.frame(), 
     aes(x=T, y=seconds, group=method, color=method)) + 
-    geom_line(size=2) + labs(x = "Amount of timestamps", y= "Time (seconds)") 
+    geom_line(size=2) + labs(x = "Amount of timestamps", y= "Time (seconds)") +
+    theme_bw()
 dev.off()
 ```
